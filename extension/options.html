@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deep Shield - Analyzer Dashboard</title>
+    <style>
+      :root {
+        --primary: #667eea;
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --bg-color: #f4f6fb;
+        --container-bg: #ffffff;
+        --text-primary: #1a1d23;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        --card-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        --success: #10b981;
+        --error: #ef4444;
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #0d1117;
+        --container-bg: #161b22;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --border-color: #30363d;
+        --card-shadow: 0 2px 16px rgba(0,0,0,0.4);
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 32px 20px;
+        font-size: 13px;
+        line-height: 1.5;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        background: var(--container-bg);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--card-shadow);
+      }
+
+      .nav-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: 1px solid var(--border-color);
+        padding: 7px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: background 0.15s, color 0.15s;
+        text-decoration: none;
+        font-size: 13px;
+        font-family: inherit;
+      }
+
+      .back-btn:hover { background: var(--bg-color); color: var(--text-primary); }
+
+      header h1 {
+        font-size: 26px;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      header p {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* Section Cards */
+      .section-card {
+        background: var(--bg-color);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        border: 1px solid var(--border-color);
+      }
+
+      .section-card h2 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+      }
+
+      /* Settings */
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+      }
+
+      .setting-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .setting-item label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+
+      .setting-item input,
+      .setting-item select {
+        padding: 9px 10px;
+        border-radius: 9px;
+        border: 1.5px solid var(--border-color);
+        font-size: 13px;
+        background: var(--container-bg);
+        color: var(--text-primary);
+        font-family: inherit;
+        transition: border-color 0.15s;
+      }
+
+      .setting-item input:focus,
+      .setting-item select:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .save-btn {
+        grid-column: span 2;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 11px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        margin-top: 6px;
+        transition: transform 0.15s, box-shadow 0.15s;
+        font-family: inherit;
+      }
+
+      .save-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(102,126,234,0.35);
+      }
+
+      /* History */
+      .history-list { display: flex; flex-direction: column; gap: 10px; }
+
+      .history-item {
+        background: var(--container-bg);
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        transition: box-shadow 0.15s, transform 0.15s;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .history-item:hover {
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        transform: translateY(-1px);
+      }
+
+      .history-main h3 {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-primary);
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+      }
+
+      .history-meta {
+        display: flex;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--text-secondary);
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .badge-classic { background: #dbeafe; color: #1d4ed8; }
+      .badge-ai      { background: #f3e5f5; color: #7b1fa2; }
+
+      .history-score {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 1px;
+      }
+
+      .score-big { font-size: 22px; font-weight: 800; line-height: 1; }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .clear-btn {
+        background: none;
+        border: 1px solid var(--error);
+        color: var(--error);
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+        font-family: inherit;
+      }
+
+      .clear-btn:hover { background: var(--error); color: white; }
+
+      .loading, .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+
+      /* Pro Section */
+      .tier-badge-options {
+        font-size: 10px;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 5px;
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+      }
+      .tier-badge-options.free { background: #dbeafe; color: #1d4ed8; }
+      .tier-badge-options.pro  { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+
+      .pro-active-msg {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
+      .pro-features {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .pro-feature-item {
+        font-size: 12px;
+        color: var(--text-secondary);
+        padding: 6px 10px;
+        background: var(--bg-color);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      .activation-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .license-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 13px;
+        background: var(--bg-color);
+        color: var(--text-primary);
+        font-family: monospace;
+      }
+
+      .license-input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .activate-btn {
+        padding: 10px 20px;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 13px;
+        transition: opacity 0.2s;
+        white-space: nowrap;
+      }
+
+      .activate-btn:hover { opacity: 0.9; }
+      .activate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      .activation-status {
+        font-size: 12px;
+        font-weight: 600;
+        min-height: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav-header">
+        <header>
+          <h1>Deep Shield</h1>
+          <p>Settings &amp; History</p>
+        </header>
+        <a href="popup.html" class="back-btn">← Back to popup</a>
+      </div>
+
+      <div class="section-card" id="settings">
+        <h2>⚙️ Global Settings</h2>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label>Sensitivity Threshold (Classic Mode)</label>
+            <input type="number" id="optScoreThreshold" min="0" max="100" />
+          </div>
+          <div class="setting-item">
+            <label>Analysis Mode</label>
+            <select id="optAnalysisMode">
+              <option value="classic">Classic Analysis</option>
+              <option value="ai">AI Insight Engine</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>Display Theme</label>
+            <select id="optTheme">
+              <option value="light">Light Mode</option>
+              <option value="dark">Dark Mode</option>
+              <option value="system">System Default</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label>Highlight Results on Page</label>
+            <select id="optHighlightEnabled">
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+          <button class="save-btn" id="saveSettingsBtn">
+            Save Preferences
+          </button>
+        </div>
+      </div>
+
+      <!-- Pro Activation Section -->
+      <div class="section-card" id="proSection">
+        <div class="controls">
+          <h2>⚡ Deep Shield Pro</h2>
+          <span id="currentTierBadge" class="tier-badge-options free">Free Plan</span>
+        </div>
+        <div id="proActiveMsg" style="display:none;" class="pro-active-msg">
+          ✅ Pro is active. Enjoy unlimited AI scans!
+        </div>
+        <div id="proActivationForm">
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+            Free plan includes <strong>100 scans per day</strong>.
+            Upgrade to Pro for unlimited scans across all content types.
+          </p>
+          <div class="pro-features">
+            <div class="pro-feature-item">✓ Unlimited AI text scans</div>
+            <div class="pro-feature-item">✓ Unlimited image &amp; video deepfake detection</div>
+            <div class="pro-feature-item">✓ Priority analysis queue</div>
+            <div class="pro-feature-item">✓ Full analysis history &amp; export</div>
+          </div>
+
+          <!-- Step 1: Sign in (shown when logged out) -->
+          <div id="optionsSigninSection">
+            <p style="font-size:12px;font-weight:600;color:var(--text-primary);margin:16px 0 8px;">Step 1 — Sign in to your account</p>
+            <div id="optionsLoggedInRow" style="display:none;padding:10px 14px;background:var(--bg-color);border-radius:10px;border:1px solid var(--border-color);margin-bottom:12px;">
+              <span style="font-size:13px;">✓ Signed in as <strong id="optionsUserEmail"></strong></span>
+              <button id="optionsLogoutBtn" style="float:right;background:none;border:none;color:#e74c3c;cursor:pointer;font-size:12px;font-weight:600;">Sign out</button>
+            </div>
+            <div id="optionsLoginForm" style="display:none;">
+              <input type="email" id="optionsLoginEmail" class="license-input" placeholder="Email address" style="margin-bottom:8px;" autocomplete="email" />
+              <input type="password" id="optionsLoginPassword" class="license-input" placeholder="Password" style="margin-bottom:8px;" autocomplete="current-password" />
+              <div style="display:flex;gap:8px;">
+                <button id="optionsLoginBtn" class="save-btn" style="flex:1;">Sign In</button>
+                <button id="optionsRegisterBtn" class="save-btn" style="flex:1;background:var(--bg-color);color:var(--text-primary);border:1px solid var(--border-color);">Register</button>
+              </div>
+            </div>
+            <div id="optionsAuthStatus" class="activation-status" style="margin-top:8px;"></div>
+          </div>
+
+          <!-- Step 2: Enter license key (shown when logged in) -->
+          <div id="optionsLicenseSection" style="margin-top:16px;">
+            <p style="font-size:12px;font-weight:600;color:var(--text-primary);margin:0 0 8px;">Step 2 — Enter your license key</p>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="licenseKeyInput" class="license-input" placeholder="DS-PRO-XXXXXXXX" autocomplete="off" spellcheck="false" style="flex:1;" />
+              <button id="activateProBtn" class="save-btn">Activate</button>
+            </div>
+            <div id="activationStatus" class="activation-status" style="margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis History Section -->
+      <div class="section-card" id="history">
+        <div class="section-header">
+          <h2>📋 Analysis History</h2>
+          <button id="clearAllBtn" class="clear-btn">Clear All</button>
+        </div>
+        <div id="loading" style="display:none;text-align:center;padding:20px;font-size:13px;color:var(--text-secondary);">Loading…</div>
+        <div id="emptyState" class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <strong>No history yet</strong>
+          <p style="margin-top:6px;font-size:12px;">Analyses you run will appear here.</p>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </div>
+
+      <!-- Feedback History Section -->
+      <div class="section-card" id="feedbackSection">
+        <div class="section-header">
+          <h2>💬 Feedback History</h2>
+          <button id="clearFeedbackBtn" class="clear-btn">Clear All</button>
+        </div>
+        <div id="feedbackLoading" style="display:none;text-align:center;padding:20px;font-size:13px;color:var(--text-secondary);">Loading…</div>
+        <div id="feedbackEmptyState" class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <strong>No feedback yet</strong>
+          <p style="margin-top:6px;font-size:12px;">Feedback submitted from the extension will appear here.</p>
+        </div>
+        <div id="feedbackList" class="feedback-list"></div>
+      </div>
+
+    </div><!-- /.options-container -->
+  </div><!-- /.page-wrapper -->
+
+  <script src="options.js"></script>
+</body>
+</html>
