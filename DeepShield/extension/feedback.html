@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deep Shield - Reviews & Feedback</title>
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --primary: #667eea;
+        --bg-color: #f4f6fb;
+        --container-bg: #ffffff;
+        --text-primary: #1a1d23;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        --card-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #0d1117;
+        --container-bg: #161b22;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --border-color: #30363d;
+        --card-shadow: 0 2px 16px rgba(0,0,0,0.4);
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 32px 20px;
+        font-size: 13px;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        background: var(--container-bg);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--card-shadow);
+      }
+
+      .nav-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: 1px solid var(--border-color);
+        padding: 7px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: background 0.15s, color 0.15s;
+        text-decoration: none;
+        font-size: 13px;
+        font-family: inherit;
+      }
+
+      .back-btn:hover { background: var(--bg-color); color: var(--text-primary); }
+
+      header h1 {
+        font-size: 26px;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      header p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+      .feedback-list { display: flex; flex-direction: column; gap: 12px; }
+
+      .feedback-card {
+        background: var(--bg-color);
+        border-radius: 14px;
+        padding: 18px;
+        border: 1px solid var(--border-color);
+        transition: box-shadow 0.15s, transform 0.15s;
+      }
+
+      .feedback-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      }
+
+      .feedback-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .rating-container { font-size: 16px; letter-spacing: 1px; }
+      .timestamp { font-size: 11px; color: var(--text-secondary); }
+
+      .feedback-comment {
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 8px 0;
+        color: var(--text-primary);
+      }
+
+      .feedback-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        gap: 8px;
+      }
+
+      .feedback-stars { font-size: 15px; letter-spacing: 1px; }
+      .feedback-date { font-size: 11px; color: var(--text-secondary); margin-left: auto; }
+
+      .feedback-label {
+        display: inline-block;
+        margin-top: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+      }
+
+      .pending-badge {
+        font-size: 10px;
+        font-weight: 600;
+        background: #f39c1220;
+        color: #f39c12;
+        border: 1px solid #f39c1240;
+        border-radius: 6px;
+        padding: 2px 6px;
+      }
+
+      .analysis-preview {
+        background: var(--container-bg);
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+      }
+
+      .preview-header {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+      }
+
+      .badge {
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .badge-text  { background: #dbeafe; color: #1d4ed8; }
+      .badge-image { background: #f3e5f5; color: #7b1fa2; }
+      .badge-video { background: #fef3c7; color: #92400e; }
+
+      .preview-content {
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.5;
+      }
+
+      .preview-footer {
+        margin-top: 10px;
+        display: flex;
+        gap: 14px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .loading, .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+
+      .empty-state-icon { font-size: 36px; margin-bottom: 12px; }
+
+      .label-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: var(--border-color);
+        color: var(--text-secondary);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav-header">
+        <header>
+          <h1>Deep Shield</h1>
+          <p>User Reviews &amp; Feedback</p>
+        </header>
+        <a href="popup.html" class="back-btn">← Back to popup</a>
+      </div>
+
+      <div id="loading" class="loading">Fetching feedback data...</div>
+      <div id="emptyState" class="empty-state" style="display: none">
+        <div class="empty-state-icon">💬</div>
+        <strong>No feedback yet</strong>
+        <p style="margin-top:6px;font-size:12px;">Feedback submitted from the extension will appear here.</p>
+      </div>
+      <div id="feedbackList" class="feedback-list"></div>
+    </div>
+
+    <script src="feedback.js"></script>
+  </body>
+</html>

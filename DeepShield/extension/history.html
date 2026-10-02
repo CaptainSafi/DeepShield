@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deep Shield - Analysis History</title>
+    <style>
+      :root {
+        --primary: #667eea;
+        --bg-color: #f4f6fb;
+        --container-bg: #ffffff;
+        --text-primary: #1a1d23;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+        --card-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #0d1117;
+        --container-bg: #161b22;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --border-color: #30363d;
+        --card-shadow: 0 2px 16px rgba(0,0,0,0.4);
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 32px 20px;
+        font-size: 13px;
+        transition: background 0.3s, color 0.3s;
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        background: var(--container-bg);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: var(--card-shadow);
+      }
+
+      .nav-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .brand h1 { font-size: 24px; font-weight: 800; color: var(--primary); }
+      .brand p  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+      .back-btn {
+        padding: 8px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--container-bg);
+        color: var(--text-primary);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+        white-space: nowrap;
+      }
+      .back-btn:hover { background: var(--bg-color); }
+
+      .toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+      }
+
+      .clear-btn {
+        background: none;
+        border: 1px solid #e74c3c;
+        color: #e74c3c;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+        font-family: inherit;
+      }
+      .clear-btn:hover { background: #e74c3c; color: white; }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: var(--text-secondary);
+      }
+      .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+
+      .history-list { display: flex; flex-direction: column; gap: 10px; }
+
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background: var(--bg-color);
+        gap: 12px;
+        transition: box-shadow 0.15s;
+      }
+      .history-item:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+
+      .history-main { flex: 1; min-width: 0; }
+      .history-main h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 6px;
+      }
+
+      .history-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        font-size: 11px;
+        color: var(--text-secondary);
+      }
+
+      .badge {
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .badge-ai      { background: #667eea20; color: #667eea; border: 1px solid #667eea40; }
+      .badge-classic { background: #27ae6020; color: #27ae60; border: 1px solid #27ae6040; }
+      .badge-image   { background: #f39c1220; color: #f39c12; border: 1px solid #f39c1240; }
+      .badge-video   { background: #e74c3c20; color: #e74c3c; border: 1px solid #e74c3c40; }
+
+      .history-score { text-align: center; flex-shrink: 0; }
+      .score-big     { font-size: 22px; font-weight: 800; }
+      .score-label   { font-size: 10px; font-weight: 700; margin-top: 2px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav-header">
+        <div class="brand">
+          <h1>Deep Shield</h1>
+          <p>Analysis History</p>
+        </div>
+        <button class="back-btn" id="backBtn">← Back to popup</button>
+        <script src="history-back.js"></script>
+      </div>
+
+      <div class="toolbar">
+        <button id="clearAllBtn" class="clear-btn">Clear All</button>
+      </div>
+
+      <div id="loading" class="loading">Loading history…</div>
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="empty-state-icon">📋</div>
+        <strong>No history yet</strong>
+        <p style="margin-top:6px;font-size:12px;">Analyses you run will appear here.</p>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </div>
+
+    <script src="history.js"></script>
+  </body>
+</html>
